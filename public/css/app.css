@@ -1,0 +1,162 @@
+/* =====================================================================================
+   app.css — tokens, layout, controls, and ONE rule for Expert mode.
+   ===================================================================================== */
+
+:root {
+  --bg:      #fbfbf9;
+  --card:    #ffffff;
+  --fg:      #16181d;
+  --muted:   #6b7280;
+  --line:    #dcdcd5;
+  --arm:     #1f2937;
+  --accent:  #2563eb;
+  --ghost:   #9aa1ad;
+  --region:  #c2374a;
+  --obstacle: #5c6673;
+  --ok:      #15803d;
+  --warn:    #b45309;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:     #14161a;
+    --card:   #1b1e24;
+    --fg:     #e9e9e5;
+    --muted:  #99a0ab;
+    --line:   #2d323b;
+    --arm:    #ccd2dc;
+    --accent: #7aa8ff;
+    --ghost:  #666e7c;
+    --region: #ef7183;
+    --obstacle: #838d9a;
+    --ok:     #4ade80;
+    --warn:   #fbbf24;
+  }
+}
+
+/* The whole of Expert mode. */
+body:not([data-mode="expert"]) .x { display: none !important; }
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+.wrap { max-width: 940px; margin: 0 auto; padding: 22px 16px 72px; }
+
+/* ---- header ------------------------------------------------------------------- */
+header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+h1 { font-size: 20px; font-weight: 650; margin: 0; letter-spacing: -0.01em; }
+.sub { margin: 4px 0 0; color: var(--muted); font-size: 13.5px; max-width: 58ch; }
+
+.pill { display: flex; border: 1px solid var(--line); border-radius: 999px; background: var(--card); overflow: hidden; flex: none; }
+.pill button { border: 0; background: none; color: var(--muted); font: inherit; font-size: 13px; padding: 6px 14px; cursor: pointer; }
+.pill button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+
+/* ---- toolbar ------------------------------------------------------------------ */
+.bar { display: flex; gap: 10px 18px; flex-wrap: wrap; align-items: center; margin: 20px 0 0; }
+.group { display: flex; gap: 6px; flex-wrap: wrap; }
+
+button, .chk {
+  font: inherit; font-size: 13.5px;
+  border: 1px solid var(--line); background: var(--card); color: var(--fg);
+  border-radius: 8px; padding: 8px 13px; min-height: 38px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px;
+}
+button:hover, .chk:hover { border-color: var(--muted); }
+button:focus-visible, .chk:focus-within, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.group button[aria-checked="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.chk { user-select: none; }
+.chk input { accent-color: var(--accent); margin: 0; }
+
+.hint { color: var(--muted); font-size: 12.5px; margin: 9px 0 0; min-height: 1.4em; }
+
+/* ---- work area ---------------------------------------------------------------- */
+.work { display: grid; grid-template-columns: minmax(0, 1fr) 248px; gap: 18px; margin-top: 12px; align-items: start; }
+@media (max-width: 880px) { .work { grid-template-columns: 1fr; } }
+
+canvas {
+  width: 100%; max-width: min(100%, 66vh); aspect-ratio: 1 / 1; display: block; margin: 0 auto;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--card);
+  touch-action: none; cursor: crosshair;
+}
+.note { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
+
+/* ---- parameter panel ----------------------------------------------------------- */
+.panel { display: flex; flex-direction: column; gap: 10px; }
+@media (max-width: 880px) { .panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); } }
+
+.chip {
+  border: 1px solid var(--line); background: var(--card); border-radius: 8px;
+  padding: 8px 11px; font-size: 13px; font-variant-numeric: tabular-nums;
+}
+.chip b { font-weight: 600; }
+.chip[data-level="near"] { color: var(--warn); border-color: var(--warn); }
+.chip[data-level="bad"]  { color: var(--region); border-color: var(--region); }
+
+.card { border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 10px 11px 11px; }
+.card .top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.card .nm { font-size: 13px; font-weight: 600; }
+.card .val { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.card .help { font-size: 11.5px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+.card input[type="range"] { width: 100%; margin: 7px 0 0; accent-color: var(--accent); }
+
+.readout { margin: 2px 0 0; font-size: 12px; border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; background: var(--card); }
+.readout div { display: flex; justify-content: space-between; gap: 10px; padding: 1.5px 0; }
+.readout span:last-child { font-variant-numeric: tabular-nums; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+.banner { margin: 12px 0 0; font-size: 13px; color: var(--warn); border-left: 3px solid var(--warn); padding: 4px 0 4px 10px; }
+.banner[data-kind="ok"] { color: var(--ok); border-color: var(--ok); }
+
+/* ---- explainer ----------------------------------------------------------------- */
+.lesson { max-width: 68ch; margin: 44px 0 0; }
+.lesson > h2 { font-size: 15px; font-weight: 650; margin: 0 0 4px; }
+.step { margin: 0 0 26px; }
+.step h3 { font-size: 14px; font-weight: 650; margin: 0 0 7px; }
+.step h3 i { color: var(--muted); font-style: normal; font-weight: 500; margin-right: 7px; }
+.step p { margin: 8px 0 0; }
+.step .x { color: var(--fg); }
+.step .x p:first-child { margin-top: 10px; }
+
+/* Formulas: one serif-italic class and real Unicode. No fractions, no matrices,
+   no library — nothing that can fail to load or substitute a missing glyph. */
+.eq {
+  display: block; overflow-x: auto; white-space: nowrap;
+  font-family: "STIX Two Math", "Latin Modern Math", Cambria, Georgia, "Times New Roman", serif;
+  font-style: italic; font-size: 16px; line-height: 1.8;
+  padding: 9px 12px; margin: 9px 0; border-left: 2px solid var(--line);
+}
+.eq .up { font-style: normal; }
+.eq sub, .eq sup { font-style: normal; font-size: 0.70em; }
+.eq .c  { font-style: normal; color: var(--muted); font-family: system-ui, sans-serif; font-size: 12.5px; margin: 0 0.6em; }
+.math { font-family: "STIX Two Math", "Latin Modern Math", Cambria, Georgia, serif; font-style: italic; }
+
+table.h { border-collapse: collapse; margin: 10px 0 0; font-size: 13px; }
+table.h td { padding: 2px 16px 2px 0; }
+table.h td:first-child { font-family: "STIX Two Math", Cambria, Georgia, serif; font-style: italic; white-space: nowrap; }
+
+blockquote {
+  margin: 30px 0 0; padding: 14px 16px; border: 1px solid var(--line);
+  border-radius: 8px; background: var(--card); font-size: 13.5px;
+}
+blockquote b { display: block; font-size: 14.5px; margin-bottom: 6px; }
+blockquote span { color: var(--muted); }
+
+@media (max-width: 620px) {
+  .wrap { padding: 14px 12px 56px; }
+  h1 { font-size: 17px; }
+  .sub { font-size: 12.5px; }
+  .bar { margin-top: 14px; gap: 8px 10px; }
+  button, .chk { padding: 7px 11px; min-height: 40px; font-size: 13px; }
+  canvas { max-width: min(100%, 52vh); }
+  .lesson { margin-top: 34px; }
+}
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

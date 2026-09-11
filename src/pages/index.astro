@@ -1,0 +1,97 @@
+---
+import Explainer from '../components/Explainer.astro';
+
+// One entry per slider. Adding a parameter is one line, in one place: app.js reads
+// [data-param] out of the DOM, so nothing else needs to know about it.
+// `log: true` makes the slider linear in log space (0-100 maps onto [min, max]).
+const PARAMS = [
+  { id: 'alpha',  label: 'α',              unit: '1/s', min: 0.2,  max: 20,   step: 0.01, value: 2.0,  log: true,
+    help: 'how fast you may approach, per metre of clearance' },
+  { id: 'vmax',   label: 'Speed',          unit: 'm/s', min: 0.10, max: 1.50, step: 0.05, value: 0.70,
+    help: 'how hard the plain controller pushes' },
+  { id: 'eps',    label: 'ε',              unit: '',    min: 0.10, max: 1.00, step: 0.01, value: 0.25, expert: true,
+    help: 'how tightly the forbidden region wraps the obstacle: small hugs the rectangle, 1 is an ellipse around it' },
+];
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Control Barrier Functions on a 2-link arm</title>
+  <meta name="description" content="An interactive, dependency-free explanation of control barrier functions: a 2-link robot arm reaches a target without entering the regions you draw." />
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="./css/app.css" />
+</head>
+<body data-mode="simple">
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>Control Barrier Functions on a 2-link arm</h1>
+      <p class="sub">A robot arm may go anywhere &mdash; as long as it slows down near what it must not touch.</p>
+    </div>
+    <div class="pill" role="group" aria-label="Detail level">
+      <button id="m-simple" aria-pressed="true">Simple</button>
+      <button id="m-expert" aria-pressed="false">Expert</button>
+    </div>
+  </header>
+
+  <div class="bar">
+    <div class="group" role="radiogroup" aria-label="What a click places">
+      <button role="radio" data-tool="target"   aria-checked="true">Target</button>
+      <button role="radio" data-tool="obstacle" aria-checked="false">Obstacle</button>
+      <button role="radio" data-tool="region"   aria-checked="false">Forbidden region</button>
+    </div>
+    <div class="group">
+      <button id="run" class="primary">&#9654; Run</button>
+      <button id="reset">&#8634; Reset</button>
+      <button id="clear">Clear</button>
+      <label class="chk"><input type="checkbox" id="filterOn" checked /> Safety filter</label>
+    </div>
+  </div>
+  <p class="hint" id="hint"></p>
+
+  <div class="work">
+    <div>
+      <canvas id="c" role="img" aria-label="A two-link robot arm, a target, and the forbidden regions its end effector must stay out of."></canvas>
+      <p class="note">Only the end effector is guarded &mdash; the textbook case. Draw a region close in and the links can still pass through it.</p>
+    </div>
+
+    <aside class="panel">
+      <div class="chip" id="chip">clearance <b>h</b> = &mdash;</div>
+
+      {PARAMS.map((p) => (
+        <div class={'card' + (p.expert ? ' x' : '')}>
+          <div class="top">
+            <span class="nm">{p.label}</span>
+            <span class="val" id={`v-${p.id}`}></span>
+          </div>
+          <input type="range" data-param={p.id} data-unit={p.unit}
+                 min={p.log ? 0 : p.min} max={p.log ? 100 : p.max} step={p.log ? 1 : p.step}
+                 data-log={p.log ? `${p.min},${p.max}` : null}
+                 data-step={p.step}
+                 value={p.log ? Math.round(100 * Math.log(p.value / p.min) / Math.log(p.max / p.min)) : p.value}
+                 aria-label={p.label} />
+          <div class="help">{p.help}</div>
+        </div>
+      ))}
+
+      <div class="readout x" id="readout">
+        <div><span>clearance <span class="math">h</span></span><span id="r-h">&mdash;</span></div>
+        <div><span>filter effort <span class="math">‖u − u</span><span class="math">ₙₒₘ‖</span></span><span id="r-du">&mdash;</span></div>
+        <div><span>active rules</span><span id="r-act">&mdash;</span></div>
+      </div>
+    </aside>
+  </div>
+
+  <p class="banner" id="banner" aria-live="polite" hidden></p>
+
+  <Explainer />
+</div>
+
+<!-- is:inline is load-bearing: without it Astro rewrites this to a hashed bundle path,
+     which 404s under a repo sub-path. Keep it. -->
+<script type="module" src="./js/app.js" is:inline></script>
+</body>
+</html>
