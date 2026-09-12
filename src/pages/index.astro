@@ -5,12 +5,14 @@ import Explainer from '../components/Explainer.astro';
 // [data-param] out of the DOM, so nothing else needs to know about it.
 // `log: true` makes the slider linear in log space (0-100 maps onto [min, max]).
 const PARAMS = [
-  { id: 'alpha',  label: 'α',              unit: '1/s', min: 0.2,  max: 20,   step: 0.01, value: 2.0,  log: true,
+  { id: 'alpha', label: 'α',  unit: '1/s', min: 0.2,  max: 20,   step: 0.01, value: 2.0,  log: true,
     help: 'how fast you may approach, per metre of clearance' },
-  { id: 'vmax',   label: 'Speed',          unit: 'm/s', min: 0.10, max: 1.50, step: 0.05, value: 0.70,
+  { id: 'vmax',  label: 'Speed', unit: 'm/s', min: 0.10, max: 1.50, step: 0.05, value: 0.70,
     help: 'how hard the plain controller pushes' },
-  { id: 'eps',    label: 'ε',              unit: '',    min: 0.10, max: 1.00, step: 0.01, value: 0.25, expert: true,
+  { id: 'eps',   label: 'ε',  unit: '',    min: 0.10, max: 1.00, step: 0.01, value: 0.25, expert: true,
     help: 'how tightly the forbidden region wraps the obstacle: small hugs the rectangle, 1 is an ellipse around it' },
+  { id: 'expo',  label: 'p',  unit: '',    min: 1.00, max: 3.00, step: 0.05, value: 1.00, expert: true,
+    help: 'exponent in α(h) = α·hᵖ — 1 is the textbook straight line, 2 is the paper’s h². Larger p buys caution close to the boundary and freedom far from it' },
 ];
 ---
 <!doctype html>
@@ -18,8 +20,8 @@ const PARAMS = [
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Control Barrier Functions on a 2-link arm</title>
-  <meta name="description" content="An interactive, dependency-free explanation of control barrier functions: a 2-link robot arm reaches a target without entering the regions you draw." />
+  <title>Careful Bot Finds the target</title>
+  <meta name="description" content="An interactive, dependency-free explanation of control barrier functions: a planar robot arm reaches a target without entering the regions you draw." />
   <link rel="icon" href="data:," />
   <link rel="stylesheet" href="./css/app.css" />
 </head>
@@ -28,8 +30,8 @@ const PARAMS = [
 
   <header>
     <div>
-      <h1>Control Barrier Functions on a 2-link arm</h1>
-      <p class="sub">A robot arm may go anywhere &mdash; as long as it slows down near what it must not touch.</p>
+      <h1><b>C</b>areful <b>B</b>ot <b>F</b>inds the target</h1>
+      <p class="sub">Control Barrier Functions on a robot arm</p>
     </div>
     <div class="pill" role="group" aria-label="Detail level">
       <button id="m-simple" aria-pressed="true">Simple</button>
@@ -47,15 +49,17 @@ const PARAMS = [
       <button id="run" class="primary">&#9654; Run</button>
       <button id="reset">&#8634; Reset</button>
       <button id="clear">Clear</button>
-      <label class="chk"><input type="checkbox" id="filterOn" checked /> Safety filter</label>
+      <label class="chk"><input type="checkbox" id="filterOn" data-flag="filterOn" checked /> Safety filter</label>
     </div>
   </div>
   <p class="hint" id="hint"></p>
 
   <div class="work">
-    <div>
-      <canvas id="c" role="img" aria-label="A two-link robot arm, a target, and the forbidden regions its end effector must stay out of."></canvas>
-      <p class="note">Only the end effector is guarded &mdash; the textbook case. Draw a region close in and the links can still pass through it.</p>
+    <div class="stage">
+      <canvas id="c" role="img" aria-label="A planar robot arm, a target, and the forbidden regions its end effector must stay out of."></canvas>
+      <canvas id="p" role="img" aria-label="The rule, plotted: the fastest the clearance h is allowed to fall, against h itself, with the arm's current state on it."></canvas>
+      <p class="caption">The rule itself. The arm is the dot; it can never fall below the curve.</p>
+      <p class="note" id="note"></p>
     </div>
 
     <aside class="panel">
@@ -70,16 +74,30 @@ const PARAMS = [
           <input type="range" data-param={p.id} data-unit={p.unit}
                  min={p.log ? 0 : p.min} max={p.log ? 100 : p.max} step={p.log ? 1 : p.step}
                  data-log={p.log ? `${p.min},${p.max}` : null}
-                 data-step={p.step}
                  value={p.log ? Math.round(100 * Math.log(p.value / p.min) / Math.log(p.max / p.min)) : p.value}
                  aria-label={p.label} />
           <div class="help">{p.help}</div>
         </div>
       ))}
 
+      <div class="card x">
+        <div class="top"><span class="nm">The arm</span></div>
+        <div class="seg" role="radiogroup" aria-label="Number of joints">
+          <button role="radio" data-joints="2" aria-checked="true">2</button>
+          <button role="radio" data-joints="3" aria-checked="false">3</button>
+          <button role="radio" data-joints="4" aria-checked="false">4</button>
+          <span class="segl">joints</span>
+        </div>
+        <label class="opt"><input type="checkbox" data-flag="wholeArm" /> Guard every link</label>
+        <div class="help">not just the end effector — one row per link, at its closest point</div>
+        <label class="opt"><input type="checkbox" data-flag="selfAvoid" /> Avoid self-collision</label>
+        <div class="help">keeps links that are two apart from touching; needs 3 joints or more</div>
+      </div>
+
       <div class="readout x" id="readout">
         <div><span>clearance <span class="math">h</span></span><span id="r-h">&mdash;</span></div>
         <div><span>filter effort <span class="math">‖u − u</span><span class="math">ₙₒₘ‖</span></span><span id="r-du">&mdash;</span></div>
+        <div><span>constraint rows</span><span id="r-rows">&mdash;</span></div>
         <div><span>active rules</span><span id="r-act">&mdash;</span></div>
       </div>
     </aside>

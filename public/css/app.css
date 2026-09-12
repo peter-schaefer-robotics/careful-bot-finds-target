@@ -8,11 +8,11 @@
   --fg:      #16181d;
   --muted:   #6b7280;
   --line:    #dcdcd5;
-  --arm:     #1f2937;
+  --arm:     #3d4654;
   --accent:  #2563eb;
   --ghost:   #9aa1ad;
   --region:  #c2374a;
-  --obstacle: #5c6673;
+  --obstacle: #7b6f61;
   --ok:      #15803d;
   --warn:    #b45309;
   color-scheme: light dark;
@@ -25,11 +25,11 @@
     --fg:     #e9e9e5;
     --muted:  #99a0ab;
     --line:   #2d323b;
-    --arm:    #ccd2dc;
+    --arm:    #aeb7c4;
     --accent: #7aa8ff;
     --ghost:  #666e7c;
     --region: #ef7183;
-    --obstacle: #838d9a;
+    --obstacle: #8c7f6e;
     --ok:     #4ade80;
     --warn:   #fbbf24;
   }
@@ -52,8 +52,21 @@ body {
 
 /* ---- header ------------------------------------------------------------------- */
 header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
-h1 { font-size: 20px; font-weight: 650; margin: 0; letter-spacing: -0.01em; }
-.sub { margin: 4px 0 0; color: var(--muted); font-size: 13.5px; max-width: 58ch; }
+h1 { font-size: 21px; font-weight: 460; margin: 0; letter-spacing: 0; }
+h1 b { font-weight: 800; }
+.sub { margin: 3px 0 0; color: var(--muted); font-size: 14px; max-width: 58ch; }
+
+/* numbered sources, as in a paper */
+.ref { font-family: system-ui, sans-serif; font-style: normal; font-size: 10.5px;
+       vertical-align: super; color: var(--muted); text-decoration: none; padding: 0 0.12em; }
+.ref:hover { text-decoration: underline; }
+.refs { max-width: 68ch; margin: 38px 0 0; font-size: 12px; color: var(--muted); }
+.refs h2 { font-size: 14px; font-weight: 650; color: var(--fg); margin: 0 0 9px; }
+.refs ol { margin: 0; padding-left: 2em; }
+.refs li { margin-bottom: 6px; line-height: 1.55; }
+.refs li:target { color: var(--fg); }
+.refs a { color: inherit; }
+.refs em { font-style: italic; }
 
 .pill { display: flex; border: 1px solid var(--line); border-radius: 999px; background: var(--card); overflow: hidden; flex: none; }
 .pill button { border: 0; background: none; color: var(--muted); font: inherit; font-size: 13px; padding: 6px 14px; cursor: pointer; }
@@ -82,12 +95,19 @@ button.primary { background: var(--accent); border-color: var(--accent); color: 
 .work { display: grid; grid-template-columns: minmax(0, 1fr) 248px; gap: 18px; margin-top: 12px; align-items: start; }
 @media (max-width: 880px) { .work { grid-template-columns: 1fr; } }
 
-canvas {
-  width: 100%; max-width: min(100%, 66vh); aspect-ratio: 1 / 1; display: block; margin: 0 auto;
-  border: 1px solid var(--line); border-radius: 10px; background: var(--card);
-  touch-action: none; cursor: crosshair;
-}
-.note { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
+.stage { max-width: min(100%, max(330px, 64vh)); margin: 0 auto; }
+canvas { display: block; width: 100%; border: 1px solid var(--line); border-radius: 10px; background: var(--card); }
+#c { aspect-ratio: 1 / 1; touch-action: none; cursor: crosshair; }
+#p { height: 148px; margin-top: 10px; }
+.caption { color: var(--muted); font-size: 11.5px; margin: 5px 0 0; text-align: center; }
+.note { color: var(--muted); font-size: 12px; margin: 10px 0 0; }
+
+.seg { display: flex; gap: 5px; align-items: center; margin: 7px 0 2px; }
+.seg button { padding: 4px 11px; min-height: 30px; font-size: 12.5px; }
+.seg button[aria-checked="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.segl { font-size: 11.5px; color: var(--muted); }
+.opt { display: flex; align-items: center; gap: 7px; font-size: 12.5px; margin-top: 9px; cursor: pointer; }
+.opt input { accent-color: var(--accent); margin: 0; }
 
 /* ---- parameter panel ----------------------------------------------------------- */
 .panel { display: flex; flex-direction: column; gap: 10px; }
@@ -122,6 +142,8 @@ canvas {
 .step h3 { font-size: 14px; font-weight: 650; margin: 0 0 7px; }
 .step h3 i { color: var(--muted); font-style: normal; font-weight: 500; margin-right: 7px; }
 .step p { margin: 8px 0 0; }
+.step h4 { font-size: 12.5px; font-weight: 650; margin: 20px 0 2px; letter-spacing: 0.01em; }
+.step h4 + .eq, .step h4 + p { margin-top: 6px; }
 .step .x { color: var(--fg); }
 .step .x p:first-child { margin-top: 10px; }
 
@@ -130,11 +152,14 @@ canvas {
 .eq {
   display: block; overflow-x: auto; white-space: nowrap;
   font-family: "STIX Two Math", "Latin Modern Math", Cambria, Georgia, "Times New Roman", serif;
-  font-style: italic; font-size: 16px; line-height: 1.8;
+  font-style: italic; font-size: 16px; line-height: 2.15;
   padding: 9px 12px; margin: 9px 0; border-left: 2px solid var(--line);
 }
-.eq .up { font-style: normal; }
+.eq .up { font-style: normal; }        /* operators, and Greek: italic α reads as an a */
 .eq sub, .eq sup { font-style: normal; font-size: 0.70em; }
+.eq .frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; margin: 0 0.14em; }
+.eq .frac > span { padding: 0 0.34em; line-height: 1.24; }
+.eq .frac > span:first-child { border-bottom: 1px solid currentColor; }
 .eq .c  { font-style: normal; color: var(--muted); font-family: system-ui, sans-serif; font-size: 12.5px; margin: 0 0.6em; }
 .math { font-family: "STIX Two Math", "Latin Modern Math", Cambria, Georgia, serif; font-style: italic; }
 
@@ -155,7 +180,8 @@ blockquote span { color: var(--muted); }
   .sub { font-size: 12.5px; }
   .bar { margin-top: 14px; gap: 8px 10px; }
   button, .chk { padding: 7px 11px; min-height: 40px; font-size: 13px; }
-  canvas { max-width: min(100%, 52vh); }
+  .stage { max-width: min(100%, max(300px, 52vh)); }
+  #p { height: 128px; }
   .lesson { margin-top: 34px; }
 }
 

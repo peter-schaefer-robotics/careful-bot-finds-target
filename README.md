@@ -1,12 +1,20 @@
-# Control Barrier Functions on a 2-link arm
+# Careful Bot Finds the target
 
-An interactive, dependency-free explanation of control barrier functions. A planar 2-link arm
-drives toward a target you click while a CBF safety filter keeps its end effector out of the
-forbidden regions you draw. Simple mode is the default; Expert mode reveals the derivations, one more parameter and the
-approach ruler on the canvas.
+Control Barrier Functions on a robot arm.
+
+An interactive, dependency-free explanation of control barrier functions. A planar arm drives
+toward a target you click while a CBF safety filter keeps it out of the forbidden regions you
+draw. Simple mode is the default; Expert mode reveals the derivations, four more controls and
+the approach ruler on the canvas.
 
 The whole lesson is five formulas, and the five numbered sections of
-[`public/js/cbf.js`](public/js/cbf.js) are those five steps in the same order.
+[`public/js/cbf.js`](public/js/cbf.js) are those five steps in the same order. Under the picture
+the rule is plotted: the curve is `ḣ = −α(h)`, the fastest the clearance may fall, and the dot is
+the arm — it can never drop below the curve.
+
+Everything is written for an arbitrary number of joints. Expert mode switches between 2, 3 and 4;
+it can guard every link instead of only the end effector, and it can add self-collision rows so
+the arm will not fold through itself.
 
 ## Develop
 
@@ -18,9 +26,9 @@ npm run build    # writes docs/
 
 ## Deploy
 
-GitHub Pages, **Source: branch `main`, folder `/docs`**. Astro builds straight into `docs/`, and that
-folder is committed — the published site *is* the committed build, so **run `npm run build` before
-committing**. `public/.nojekyll` keeps Pages from running the output through Jekyll.
+GitHub Pages, **Source: branch `main`, folder `/docs`**. Astro builds straight into `docs/`, and
+that folder is committed — the published site *is* the committed build, so **run `npm run build`
+before committing**. `public/.nojekyll` keeps Pages from running the output through Jekyll.
 
 ### Why there is no `base` path
 
@@ -46,7 +54,7 @@ npx http-server . -p 8080     # then open http://localhost:8080/docs/
 ```
 public/js/cbf.js     the maths — no DOM. §1 kinematics · §2 Jacobian · §3 barrier ·
                      §4 nominal controller · §5 the CBF rows and the filter QP
-public/js/app.js     the page — state, pointer input, the fixed-step loop, the canvas
+public/js/app.js     the page — state, pointer input, the fixed-step loop, both canvases
 public/css/app.css   tokens, layout, and the one rule that is all of Expert mode
 src/                 the Astro shell and the five lesson blocks
 ```
