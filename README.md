@@ -2,7 +2,7 @@
 
 **[▶ Try the live demo](https://peter-schaefer-robotics.github.io/careful-bot-finds-target/)**
 
-[![Screenshot of the live demo](media/screenshot.png)](https://peter-schaefer-robotics.github.io/careful-bot-finds-target/)
+[![Screenshot of the live demo](./screenshot.png)](https://peter-schaefer-robotics.github.io/careful-bot-finds-target/)
 
 Control Barrier Functions on a robot arm.
 
